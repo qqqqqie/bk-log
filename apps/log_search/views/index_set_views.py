@@ -101,7 +101,7 @@ class IndexSetViewSet(ModelViewSet):
             storage_cluster_id = serializers.IntegerField(required=False)
             category_id = serializers.CharField(required=True)
             scenario_id = serializers.CharField(required=True)
-            project_id = serializers.CharField(required=False)
+            space_uid = serializers.CharField(required=False)
             bk_biz_id = serializers.IntegerField(required=False)
             bkdata_auth_url = serializers.ReadOnlyField()
 
@@ -112,23 +112,23 @@ class IndexSetViewSet(ModelViewSet):
                 if scenario_id == Scenario.ES and not attrs.get("storage_cluster_id"):
                     raise ValidationError(_("集群ID不能为空"))
 
-                if not attrs.get("project_id"):
+                if not attrs.get("space_uid"):
                     bk_biz_id = attrs.get("bk_biz_id")
                     if bk_biz_id:
-                        # 如果用业务ID，则先转换为 project_id
+                        # 如果用业务ID，则先转换为 space_uid
                         project = ProjectInfo.objects.filter(bk_biz_id=bk_biz_id).first()
                         if not project:
                             raise ValidationError(_(f"业务({bk_biz_id})对应的项目信息不存在"))
-                        attrs["project_id"] = project.project_id
+                        attrs["space_uid"] = project.space_uid
                     else:
-                        raise ValidationError(_("参数 bk_biz_id 和 project_id 请至少提供一项"))
+                        raise ValidationError(_("参数 bk_biz_id 和 space_uid 请至少提供一项"))
 
                 return attrs
 
         class UpdateSerializer(CustomSerializer):
             storage_cluster_id = serializers.IntegerField(required=False, default=None)
             scenario_id = serializers.CharField(read_only=True)
-            project_id = serializers.CharField(read_only=True)
+            space_uid = serializers.CharField(read_only=True)
             bkdata_auth_url = serializers.ReadOnlyField()
 
         class ShowMoreSerializer(CustomSerializer):
@@ -412,7 +412,7 @@ class IndexSetViewSet(ModelViewSet):
 
         index_set = IndexSetHandler.create(
             data["index_set_name"],
-            data["project_id"],
+            data["space_uid"],
             storage_cluster_id,
             data["scenario_id"],
             data["view_roles"],
@@ -544,7 +544,7 @@ class IndexSetViewSet(ModelViewSet):
             data["view_roles"],
             data["indexes"],
             auth_info["bk_app_code"],
-            project_id=data.get("project_id"),
+            space_uid=data.get("space_uid"),
             storage_cluster_id=data.get("storage_cluster_id"),
             category_id=data.get("category_id"),
             collector_config_id=data.get("collector_config_id"),

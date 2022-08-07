@@ -68,7 +68,7 @@ class MetaViewSet(APIViewSet):
         @api {get} /meta/projects/ 获取项目列表
         @apiName list_meta_projects
         @apiGroup 01_Meta
-        @apiSuccess {Int} project_id 项目ID
+        @apiSuccess {Int} space_uid 空间唯一标识
         @apiSuccess {String} project_name 项目名称
         @apiSuccess {Int} bk_biz_id 业务ID
         @apiSuccess {String} bk_app_code 接入的来源APP_CODE
@@ -80,7 +80,7 @@ class MetaViewSet(APIViewSet):
             "code": 0,
             "data": [
                 {
-                    "project_id": 1,
+                    "space_uid": bkcc_2,
                     "project_name": "业务名称",
                     "bk_biz_id": 1,
                     "bk_app_code": "bk_log",
@@ -125,7 +125,7 @@ class MetaViewSet(APIViewSet):
         @api {get} /meta/projects/mine/ 获取我的项目
         @apiName list_meta_projects_mine
         @apiGroup 01_Meta
-        @apiSuccess {Int} project_id 项目ID
+        @apiSuccess {String} space_uid 空间唯一标识
         @apiSuccess {String} project_name 项目名称
         @apiSuccess {Int} bk_biz_id 业务ID
         @apiSuccess {String} bk_app_code 接入的来源APP_CODE
@@ -138,7 +138,7 @@ class MetaViewSet(APIViewSet):
             "code": 0,
             "data": [
                 {
-                    "project_id": 1,
+                    "space_uid": bkcc_1,
                     "project_name": "业务名称",
                     "bk_biz_id": 1,
                     "bk_app_code": "bk_log",
@@ -314,8 +314,8 @@ class MetaViewSet(APIViewSet):
         }
         """
         bk_biz_id = request.GET.get("bk_biz_id", "")
-        project_id = request.GET.get("project_id", "")
-        data = MetaHandler.get_biz_maintainer(bk_biz_id, project_id)
+        space_uid = request.GET.get("space_uid", "")
+        data = MetaHandler.get_biz_maintainer(bk_biz_id, space_uid)
         return Response(data)
 
     @list_route(methods=["GET"], url_path="footer_html")
@@ -485,7 +485,7 @@ class MenuViewSet(APIViewSet):
 
     def list(self, request, *args, **kwargs):
         """
-        @api {get} /meta/menu/?project_id=$project_id 获取模块列表
+        @api {get} /meta/menu/?space_uid=$space_uid 获取模块列表
         @apiName list_menu
         @apiGroup 01_Meta
         @apiSuccessExample {json} 成功返回:
@@ -516,7 +516,7 @@ class MenuViewSet(APIViewSet):
         }
         """
         # 判断是不是项目管理人员
-        project_id = request.GET.get("project_id")
-        if not project_id:
-            raise ValidationError(errors=_("project_id不能为空"))
-        return Response(MetaHandler.get_menus(project_id, request.user.is_superuser))
+        space_uid = request.GET.get("space_uid")
+        if not space_uid:
+            raise ValidationError(errors=_("space_uid不能为空"))
+        return Response(MetaHandler.get_menus(space_uid, request.user.is_superuser))

@@ -51,7 +51,7 @@ class PageSerializer(serializers.Serializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectInfo
-        fields = ["project_id", "project_name", "bk_biz_id", "bk_app_code", "time_zone", "description"]
+        fields = ["space_uid", "bk_biz_id",  "project_name", "bk_biz_id", "bk_app_code", "time_zone", "description"]
 
 
 class ResultTableListSerializer(serializers.Serializer):
@@ -193,14 +193,14 @@ class UserSearchHistorySerializer(serializers.Serializer):
 class SearchIndexSetScopeSerializer(serializers.Serializer):
     """
     获取索引集所属项目
-    如果用户传的是bk_biz_id，直接转成对应的project_id
+    如果用户传的是bk_biz_id，直接转成对应的space_uid
     """
 
-    project_id = serializers.IntegerField(label=_("项目ID"), required=False)
+    space_uid = serializers.CharField(label=_("空间唯一标识"), required=False)
     bk_biz_id = serializers.IntegerField(label=_("业务ID"), required=False)
 
     def validate(self, attrs):
-        if attrs.get("project_id"):
+        if attrs.get("space_uid"):
             return attrs
         if not attrs.get("bk_biz_id"):
             raise ValidationError(_("请输入业务ID"))
@@ -336,7 +336,7 @@ class FavoriteSearchSerializer(serializers.Serializer):
     检索收藏序列化
     """
 
-    project_id = serializers.IntegerField(label=_("项目ID"), required=False)
+    space_uid = serializers.CharField(label=_("空间唯一标识"), required=False)
     index_set_id = serializers.IntegerField(label=_("索引集ID"), required=False)
     description = serializers.CharField(label=_("收藏描述"), max_length=50)
     host_scopes = serializers.DictField(default={}, required=False)
@@ -346,22 +346,22 @@ class FavoriteSearchSerializer(serializers.Serializer):
     def validate(self, attrs):
         if not attrs.get("index_set_id"):
             raise ValidationError(_("索引集ID不能为空"))
-        if not attrs.get("project_id"):
-            raise ValidationError(_("项目id不能为空"))
+        if not attrs.get("space_uid"):
+            raise ValidationError(_("空间唯一标识不能为空"))
         return attrs
 
 
 class FavoriteSearchListSerializer(serializers.Serializer):
     """
     获取收藏所属项目
-    如果用户传的是bk_biz_id，直接转成对应的project_id
+    如果用户传的是bk_biz_id，直接转成对应的space_uid
     """
 
-    project_id = serializers.IntegerField(label=_("项目ID"), required=False)
+    space_uid = serializers.IntegerField(label=_("空间唯一标识"), required=False)
     bk_biz_id = serializers.IntegerField(label=_("业务ID"), required=False)
 
     def validate(self, attrs):
-        if attrs.get("project_id"):
+        if attrs.get("space_uid"):
             return attrs
         if not attrs.get("bk_biz_id"):
             raise ValidationError(_("请输入业务ID"))

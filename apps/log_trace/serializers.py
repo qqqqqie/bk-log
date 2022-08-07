@@ -36,11 +36,11 @@ from apps.utils.local import get_local_param
 class TraceIndexSetScopeSerializer(serializers.Serializer):
     """
     获取索引集所属项目
-    如果用户传的是bk_biz_id，直接转成对应的project_id, 新项目要求bk_biz_id
+    如果用户传的是bk_biz_id，直接转成对应的space_uid, 新项目要求bk_biz_id
     """
 
     bk_biz_id = serializers.IntegerField(label=_("业务ID"), required=False)
-    project_id = serializers.IntegerField(label=_("项目ID"), required=False)
+    space_uid = serializers.CharField(label=_("空间唯一标识"), required=False)
 
     def validate(self, attrs):
         if not attrs.get("bk_biz_id"):

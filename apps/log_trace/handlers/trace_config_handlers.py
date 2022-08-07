@@ -31,10 +31,10 @@ class TraceConfigHandlers(object):
         pass
 
     @classmethod
-    def get_user_trace_index_set(cls, project_id, bk_biz_id, request, scenarios=None):
-        if not project_id:
+    def get_user_trace_index_set(cls, space_uid, bk_biz_id, request, scenarios=None):
+        if not space_uid:
             raise IndexTraceProjectIDException()
-        index_set_ids = LogIndexSet.objects.filter(project_id=project_id).values_list("index_set_id", flat=True)
+        index_set_ids = LogIndexSet.objects.filter(space_uid=space_uid).values_list("index_set_id", flat=True)
         index_sets = LogIndexSet.get_index_set(index_set_ids, scenarios, is_trace_log=True)
         with ignored(Exception):
             cls.refresh_grafana(bk_biz_id, request)

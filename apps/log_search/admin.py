@@ -39,7 +39,7 @@ from apps.log_search.models import (
 @admin.register(ProjectInfo)
 class ProjectInfoAdmin(AppModelAdmin):
     list_display = [
-        "project_id",
+        "space_uid",
         "project_name",
         "bk_biz_id",
         "bk_app_code",
@@ -49,13 +49,13 @@ class ProjectInfoAdmin(AppModelAdmin):
         "created_by",
         "is_deleted",
     ]
-    search_fields = ["project_id", "bk_biz_id", "project_name", "bk_app_code"]
+    search_fields = ["space_uid", "bk_biz_id", "project_name", "bk_app_code"]
 
 
 @admin.register(AccessSourceConfig)
 class AccessSourceConfigAdmin(AppModelAdmin):
-    list_display = ["source_id", "source_name", "scenario_id", "project_id", "properties"]
-    search_fields = ["source_id", "source_name", "scenario_id", "project_id"]
+    list_display = ["source_id", "source_name", "scenario_id", "properties"]
+    search_fields = ["source_id", "source_name", "scenario_id"]
 
 
 @admin.register(LogIndexSet)
@@ -63,7 +63,7 @@ class LogIndexSetAdmin(AppModelAdmin):
     list_display = [
         "index_set_id",
         "index_set_name",
-        "project_id",
+        "space_uid",
         "category_id",
         "bkdata_project_id",
         "scenario_id",
@@ -77,7 +77,7 @@ class LogIndexSetAdmin(AppModelAdmin):
         "source_app_code",
         "list_operate",
     ]
-    search_fields = ["index_set_id", "index_set_name", "project_id", "scenario_id"]
+    search_fields = ["index_set_id", "index_set_name", "space_uid", "scenario_id"]
     readonly_fields = ["bkdata_project_id", "collector_config_id", "pre_check_msg", "fields_snapshot", "tag_ids"]
 
 
@@ -102,7 +102,7 @@ class LogIndexSetDataAdmin(AppModelAdmin):
 @admin.register(ResourceChange)
 class ResourceChangeAdmin(AppModelAdmin):
     list_display = [
-        "project_id",
+        "space_uid",
         "change_type",
         "group_id",
         "resource_id",

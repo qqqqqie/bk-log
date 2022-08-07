@@ -623,10 +623,10 @@ class MappingHandlers(object):
     @classmethod
     def init_ip_topo_switch(cls, index_set_id: int) -> bool:
         log_index_set_obj = LogIndexSet.objects.filter(index_set_id=index_set_id).first()
-        project_id = log_index_set_obj.project_id
-        if not project_id:
+        space_uid = log_index_set_obj.space_uid
+        if not space_uid:
             return False
-        project_obj = ProjectInfo.objects.filter(project_id=project_id).first()
+        project_obj = ProjectInfo.objects.filter(space_uid=space_uid).first()
         if not project_obj:
             return False
         # 如果第三方es的话设置为ip_topo_switch为False

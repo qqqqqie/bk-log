@@ -163,6 +163,7 @@ class Scenario(object):
 
 class ProjectInfo(SoftDeleteModel):
     project_id = models.AutoField(_("项目ID"), primary_key=True)
+    space_uid = models.CharField(_("空间唯一标识"), blank=True, default="", max_length=64)
     project_name = models.CharField(_("项目名称"), max_length=64)
     bk_biz_id = models.IntegerField(_("业务ID"), null=True, default=None)
     bk_app_code = models.CharField(_("接入的来源APP"), max_length=64)
@@ -183,9 +184,9 @@ class ProjectInfo(SoftDeleteModel):
     @classmethod
     def get_cmdb_projects(cls):
         return array_hash(
-            ProjectInfo.objects.exclude(bk_biz_id__isnull=True).values("project_id", "bk_biz_id"),
+            ProjectInfo.objects.exclude(bk_biz_id__isnull=True).values("bk_biz_id", "space_uid"),
             "bk_biz_id",
-            "project_id",
+            "space_uid",
         )
 
     @classmethod
@@ -223,7 +224,7 @@ class ProjectInfo(SoftDeleteModel):
         if not projects.exists():
             raise BizNotExistError(BizNotExistError.MESSAGE.format(bk_biz_id=biz_id))
         project = projects.first()
-        return {"project_id": project.project_id, "bk_biz_name": project.project_name}
+        return {"space_uid": project.space_uid, "bk_biz_name": project.project_name}
 
     class Meta:
         verbose_name = _("项目列表")
@@ -299,6 +300,7 @@ class LogIndexSet(SoftDeleteModel):
     index_set_id = models.AutoField(_("索引集ID"), primary_key=True)
     index_set_name = models.CharField(_("索引集名称"), max_length=64)
     project_id = models.IntegerField(_("项目ID"), db_index=True)
+    space_uid = models.CharField(_("空间唯一标识"), db_index=True, blank=True, default="", max_length=64)
     category_id = models.CharField(_("数据分类"), max_length=64, null=True, default=None)
     bkdata_project_id = models.IntegerField(_("绑定的数据平台项目ID"), null=True, default=None)
     collector_config_id = models.IntegerField(_("绑定Transfer采集ID"), null=True, default=None)
@@ -339,7 +341,7 @@ class LogIndexSet(SoftDeleteModel):
 
     def save(self, *args, **kwargs):
         queryset = LogIndexSet.objects.filter(
-            project_id=self.project_id, index_set_name=self.index_set_name, is_deleted=False
+            space_uid=self.space_uid, index_set_name=self.index_set_name, is_deleted=False
         )
         if queryset.exists() and queryset[0].index_set_id != self.index_set_id:
             raise IndexSetNameDuplicateException(
@@ -428,7 +430,7 @@ class LogIndexSet(SoftDeleteModel):
         ]
 
     @classmethod
-    def get_index_set(cls, index_set_ids=None, scenarios=None, project_id=None, is_trace_log=False, show_indices=True):
+    def get_index_set(cls, index_set_ids=None, scenarios=None, space_uid=None, is_trace_log=False, show_indices=True):
         from apps.log_search.handlers.meta import MetaHandler
 
         qs = cls.objects.filter(is_active=True)
@@ -436,13 +438,13 @@ class LogIndexSet(SoftDeleteModel):
             qs = qs.filter(index_set_id__in=index_set_ids)
         if scenarios and isinstance(scenarios, list):
             qs = qs.filter(scenario_id__in=scenarios)
-        if project_id:
-            qs = qs.filter(project_id=project_id)
+        if space_uid:
+            qs = qs.filter(space_uid=space_uid)
         if is_trace_log:
             qs = qs.filter(is_trace_log=is_trace_log)
 
         index_sets = qs.values(
-            "project_id",
+            "space_uid",
             "index_set_id",
             "index_set_name",
             "scenario_id",
@@ -472,10 +474,10 @@ class LogIndexSet(SoftDeleteModel):
             "index_set_id",
         )
 
-        projects = array_group(MetaHandler.get_projects(), "project_id", group=True)
+        projects = array_group(MetaHandler.get_projects(), "space_uid", group=True)
         result = []
         for index_set in index_sets:
-            if index_set["project_id"] not in projects:
+            if index_set["space_uid"] not in projects:
                 continue
 
             if show_indices:
@@ -495,7 +497,7 @@ class LogIndexSet(SoftDeleteModel):
                 index_set["time_field"] = time_field
 
             index_set["scenario_name"] = scenarios.get(index_set["scenario_id"])
-            index_set["bk_biz_id"] = projects[index_set["project_id"]].bk_biz_id
+            index_set["bk_biz_id"] = projects[index_set["space_uid"]].bk_biz_id
 
             index_set["tags"] = IndexSetTag.batch_get_tags(index_set["tag_ids"])
             index_set["is_favorite"] = index_set["index_set_id"] in mark_index_set_ids
@@ -686,6 +688,7 @@ class ResourceChange(OperateRecordModel):
         ResourceTypeChoices = ((INDEX_SET, _("索引集")),)
 
     project_id = models.IntegerField(_("项目ID"), db_index=True)
+    space_uid = models.CharField(_("空间唯一标识"), db_index=True, blank=True, default="", max_length=64)
     change_type = models.CharField(_("变更类型"), max_length=64, choices=ChangeType.ChangeTypeChoices)
     group_id = models.IntegerField(_("用户组ID"), null=True, default=None)
     resource_id = models.CharField(_("资源类型"), max_length=64, choices=ResourceType.ResourceTypeChoices)
@@ -703,7 +706,7 @@ class ResourceChange(OperateRecordModel):
             return True
 
         return ResourceChange(
-            project_id=index_set.project_id,
+            space_uid=index_set.space_uid,
             change_type=cls.ChangeType.RESOURCE,
             resource_id=cls.ResourceType.INDEX_SET,
             resource_scope_id=index_set.index_set_id,
@@ -720,6 +723,7 @@ class FavoriteSearch(SoftDeleteModel):
 
     search_history_id = models.IntegerField(_("用户检索历史记录ID"), db_index=True)
     project_id = models.IntegerField(_("项目ID"), db_index=True)
+    space_uid = models.CharField(_("空间唯一标识"), db_index=True, blank=True, default="", max_length=64)
     description = models.CharField(_("收藏描述"), max_length=255)
 
     class Meta:

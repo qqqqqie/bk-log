@@ -39,11 +39,11 @@ from apps.feature_toggle.handlers import toggle
 
 class MetaHandler(APIModel):
     @classmethod
-    def get_projects(cls, project_ids=None):
-        if not project_ids:
+    def get_projects(cls, space_uid_list=None):
+        if not space_uid_list:
             projects = ProjectInfo.objects.all()
         else:
-            projects = ProjectInfo.objects.filter(project_id__in=project_ids).all()
+            projects = ProjectInfo.objects.filter(space_uid__in=space_uid_list).all()
         for project in projects:
             project.project_name = f"[{project.bk_biz_id}] {project.project_name}"
         return projects
@@ -58,7 +58,7 @@ class MetaHandler(APIModel):
         for project in business_list:
             result.append(
                 {
-                    "project_id": project.project_id,
+                    "space_uid": project.space_uid,
                     "project_name": project.project_name,
                     "bk_biz_id": project.bk_biz_id,
                     "time_zone": project.time_zone,
@@ -88,19 +88,19 @@ class MetaHandler(APIModel):
                 raise ProjectInfo.DoesNotExist
             project_info = {
                 "bk_biz_id": bk_biz_id,
-                "project_id": project.pk,
                 "project_name": project.project_name,
+                "space_uid": project.space_uid,
             }
             return project_info
         except ProjectInfo.DoesNotExist:
             raise BizNotExistError(BizNotExistError.MESSAGE.format(bk_biz_id=bk_biz_id))
 
     @classmethod
-    def get_menus(cls, project_id, is_superuser):
+    def get_menus(cls, space_uid, is_superuser):
 
-        project = ProjectInfo.objects.get(project_id=project_id)
+        space_uid = ProjectInfo.objects.get(space_uid=space_uid)
         modules = copy.deepcopy(settings.MENUS)
-        cls.get_present_menus(modules, is_superuser, project)
+        cls.get_present_menus(modules, is_superuser, space_uid)
         return modules
 
     @classmethod
@@ -145,14 +145,14 @@ class MetaHandler(APIModel):
         }
 
     @classmethod
-    def get_biz_maintainer(cls, bk_biz_id, project_id):
+    def get_biz_maintainer(cls, bk_biz_id, space_uid):
         """
         @summary:查询业务运维列表
         """
         if bk_biz_id:
             project = ProjectInfo.objects.filter(bk_biz_id=bk_biz_id, is_deleted=False).first()
-        elif project_id:
-            project = ProjectInfo.objects.filter(project_id=project_id, is_deleted=False).first()
+        elif space_uid:
+            project = ProjectInfo.objects.filter(space_uid=space_uid, is_deleted=False).first()
         else:
             return {}
 

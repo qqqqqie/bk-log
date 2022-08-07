@@ -105,9 +105,9 @@ class AsyncExportHandlers(object):
 
     def _get_search_url(self):
         request = get_request()
-        project_id = ProjectInfo.objects.filter(bk_biz_id=self.search_dict["bk_biz_id"]).first().project_id
+        space_uid = ProjectInfo.objects.filter(bk_biz_id=self.search_dict["bk_biz_id"]).first().space_uid
         search_dict = copy.deepcopy(self.search_dict)
-        search_dict["projectId"] = project_id
+        search_dict["projectId"] = space_uid
         if "host_scopes" in search_dict:
             search_dict["host_scopes"] = json.dumps(search_dict["host_scopes"])
 
