@@ -32,6 +32,7 @@ from apps.log_search.models import LogIndexSet
 
 BK_BIZ_ID = 1
 PROJECT_ID = 1
+SPACE_UID = "1"
 STORAGE_CLUSTER_ID = 1
 SUCCESS_STATUS_CODE = 200
 SOURCE_APP_CODE = "log-search-4"
@@ -480,6 +481,7 @@ class TestIndexSet(TestCase):
         data = {
             "index_set_name": "登陆日志",
             "project_id": PROJECT_ID,
+            "space_uid": SPACE_UID,
             "storage_cluster_id": STORAGE_CLUSTER_ID,
             "result_table_id": "591_xx",
             "category_id": "other_rt",
@@ -535,12 +537,14 @@ class TestIndexSet(TestCase):
         index_set = LogIndexSet.objects.all().first()
         index_set_id = index_set.index_set_id
         project_id = index_set.project_id
+        space_uid = index_set.space_uid
         storage_cluster_id = index_set.storage_cluster_id
         scenario_id = index_set.scenario_id
         index_ids = [i["index_id"] for i in index_set.indexes]
 
         data = {
             "project_id": project_id,
+            "space_uid": space_uid,
             "scenario_id": scenario_id,
             "index_set_name": "登陆日志",
             "view_roles": [],
