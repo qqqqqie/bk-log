@@ -32,7 +32,7 @@ from apps.log_search.models import LogIndexSet
 
 BK_BIZ_ID = 1
 PROJECT_ID = 1
-SPACE_UID = "1"
+SPACE_UID = "type_1"
 STORAGE_CLUSTER_ID = 1
 SUCCESS_STATUS_CODE = 200
 SOURCE_APP_CODE = "log-search-4"
