@@ -352,10 +352,10 @@ class GrafanaQueryHandler:
         return new_value
 
     def get_metric_list(self, category_id=None):
-        project_id = self.project_id
-        if not project_id:
+        space_uid = self.space_uid
+        if not space_uid:
             return []
-        index_set_list = LogIndexSet.objects.filter(project_id=project_id)
+        index_set_list = LogIndexSet.objects.filter(space_uid=space_uid)
 
         if category_id:
             index_set_list = index_set_list.filter(category_id=category_id)

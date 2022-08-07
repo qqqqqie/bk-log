@@ -240,12 +240,13 @@ class AccessSourceConfig(SoftDeleteModel):
     source_name = models.CharField(_("数据源名称"), max_length=64)
     scenario_id = models.CharField(_("接入场景标识"), max_length=64, choices=Scenario.CHOICES)
     project_id = models.IntegerField(_("项目ID"), null=True, default=None)
+    space_uid = models.CharField(_("空间唯一标识"), blank=True, default="", max_length=64)
     properties = JsonField(_("属性"), default=None, null=True)
     orders = models.IntegerField(_("顺序"), default=0)
     is_editable = models.BooleanField(_("是否可以编辑"), default=True)
 
     def save(self, *args, **kwargs):
-        queryset = AccessSourceConfig.objects.filter(project_id=self.project_id, source_name=self.source_name).first()
+        queryset = AccessSourceConfig.objects.filter(space_uid=self.space_uid, source_name=self.source_name).first()
 
         # 判断名称是否重复
         if queryset and queryset.source_id != self.source_id:
@@ -253,7 +254,7 @@ class AccessSourceConfig(SoftDeleteModel):
 
         if self.scenario_id == Scenario.ES and not self.is_deleted:
             # 同项目下，不允许添加相同ip和端口的数据源
-            for source in AccessSourceConfig.objects.filter(project_id=self.project_id):
+            for source in AccessSourceConfig.objects.filter(space_uid=self.space_uid):
                 if (
                     source.properties["es_host"] == self.properties["es_host"]
                     and source.properties["es_port"] == self.properties["es_port"]
@@ -261,7 +262,7 @@ class AccessSourceConfig(SoftDeleteModel):
                 ):
                     raise SourceDuplicateException(
                         _(
-                            f"此项目[{self.project_id}]下已存在"
+                            f"此项目[{self.space_uid}]下已存在"
                             f"{self.properties['es_host']}:{self.properties['es_port']}的ES数据源"
                             f"——名称为：[{source.source_name}]"
                         )

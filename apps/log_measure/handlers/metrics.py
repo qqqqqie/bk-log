@@ -102,7 +102,7 @@ class BaseMetricCollector(object):
         self.project_biz_info = {}
 
         for project in ProjectInfo.objects.all():
-            self.project_biz_info[project.project_id] = self.biz_info.get(project.bk_biz_id)
+            self.project_biz_info[project.space_uid] = self.biz_info.get(project.bk_biz_id)
 
         # 上报时间
         self.collect_interval = collect_interval

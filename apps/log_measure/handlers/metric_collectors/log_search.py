@@ -109,7 +109,7 @@ class LogSearchMetricCollector(object):
                 is_deleted=False,
             )
             .order_by("id")
-            .values("id", "search_history_id", "project_id", "created_at")
+            .values("id", "search_history_id", "space_uid", "created_at")
         )
         history_objs = (
             UserIndexSetSearchHistory.objects.filter(
@@ -214,15 +214,15 @@ class IndexSetMetricCollector(object):
     def index_set():
         metrics = []
         groups = (
-            LogIndexSet.objects.values("project_id", "scenario_id", "is_active")
-            .order_by("project_id", "scenario_id", "is_active")
+            LogIndexSet.objects.values("space_uid", "scenario_id", "is_active")
+            .order_by("space_uid", "scenario_id", "is_active")
             .annotate(count=Count("index_set_id"))
         )
         aggregation_index_set = defaultdict(int)
         aggregation_active_index_set = defaultdict(int)
         for group in groups:
-            if MetricUtils.get_instance().project_biz_info.get(group["project_id"]):
-                bk_biz_id = MetricUtils.get_instance().project_biz_info[group["project_id"]]["bk_biz_id"]
+            if MetricUtils.get_instance().project_biz_info.get(group["space_uid"]):
+                bk_biz_id = MetricUtils.get_instance().project_biz_info[group["space_uid"]]["bk_biz_id"]
                 metrics.append(
                     # 带bk_biz_id, scenario_id, is_active标签的数据
                     Metric(

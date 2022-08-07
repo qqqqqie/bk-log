@@ -54,8 +54,8 @@ class ProjectInfoAdmin(AppModelAdmin):
 
 @admin.register(AccessSourceConfig)
 class AccessSourceConfigAdmin(AppModelAdmin):
-    list_display = ["source_id", "source_name", "scenario_id", "properties"]
-    search_fields = ["source_id", "source_name", "scenario_id"]
+    list_display = ["source_id", "source_name", "scenario_id", "space_uid", "properties"]
+    search_fields = ["source_id", "source_name", "space_uid", "scenario_id"]
 
 
 @admin.register(LogIndexSet)

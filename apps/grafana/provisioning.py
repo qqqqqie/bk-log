@@ -54,7 +54,7 @@ class Provisioning(BaseProvisioning):
 class TraceProvisioning(BaseProvisioning):
     def datasources(self, request, org_name: str, org_id: int) -> List[Datasource]:
         project_info = MetaHandler.get_project_info(org_name)
-        trace_index_sets = LogIndexSet.objects.filter(is_trace_log=True, project_id=project_info["project_id"]).values(
+        trace_index_sets = LogIndexSet.objects.filter(is_trace_log=True, space_uid=project_info["space_uid"]).values(
             "index_set_name", "index_set_id"
         )
         datasource_maps = TraceDatasourceMap.objects.filter(bk_biz_id=org_name).values("datasource_id", "index_set_id")

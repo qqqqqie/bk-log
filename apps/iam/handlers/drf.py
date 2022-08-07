@@ -91,12 +91,23 @@ class BusinessActionPermission(IAMPermission):
         return bk_biz_id
 
     @classmethod
+    def convert_space_uid_to_biz_id(cls, space_uid):
+        if not space_uid:
+            return None
+        try:
+            project = ProjectInfo.objects.get(space_uid=space_uid)
+            bk_biz_id = project.bk_biz_id
+        except ProjectInfo.DoesNotExist:
+            bk_biz_id = None
+        return bk_biz_id
+
+    @classmethod
     def fetch_biz_id_by_request(cls, request):
         bk_biz_id = request.data.get("bk_biz_id", 0) or request.query_params.get("bk_biz_id", 0)
-        project_id = request.data.get("project_id") or request.query_params.get("project_id")
+        space_uid = request.data.get("space_uid") or request.query_params.get("space_uid")
 
         if not bk_biz_id:
-            bk_biz_id = cls.convert_project_id_to_biz_id(project_id)
+            bk_biz_id = cls.convert_space_uid_to_biz_id(space_uid)
         return bk_biz_id
 
     def has_permission(self, request, view):
@@ -109,8 +120,8 @@ class BusinessActionPermission(IAMPermission):
     def has_object_permission(self, request, view, obj):
         # 先查询对象中有没有业务ID相关属性
         bk_biz_id = None
-        if hasattr(obj, "project_id"):
-            bk_biz_id = self.convert_project_id_to_biz_id(obj.project_id)
+        if hasattr(obj, "space_uid"):
+            bk_biz_id = self.convert_space_uid_to_biz_id(obj.space_uid)
         elif hasattr(obj, "bk_biz_id"):
             bk_biz_id = obj.bk_biz_id
         if bk_biz_id:
