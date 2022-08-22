@@ -83,6 +83,10 @@ class StorageHandler(object):
         if bk_biz_id == custom_option["bk_biz_id"]:
             return True
 
+            # 如果当前业务是创建业务 直接可见
+        if bk_biz_id == custom_option["bk_biz_id"]:
+            return True
+
         visible_config = custom_option["visible_config"]
 
         # 全业务可见
